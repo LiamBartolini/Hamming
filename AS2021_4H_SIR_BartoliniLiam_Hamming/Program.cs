@@ -12,17 +12,38 @@ namespace AS2021_4H_SIR_BartoliniLiam_Hamming
         {
             Console.WriteLine("Bartolini Liam, Hamming");
 
-            string strInviato;
+            string strInviato = ControlloInput("Inserisci una parola (solo 0 e 1): ");
+            Console.WriteLine($"Codifica di Hamming della parola in ingresso:\n{CalcoloHamming(strInviato)}");
+            string strRicevuto = ControlloInput("Inserisci la parola ricevuta (comprensiva di codice di Hamming), inserendovi al massimo un errore: ");
+            int ris = Comparazione(strRicevuto);
+
+            Console.WriteLine($"Il bit sbagliato si trova alla posizione {ris}");
+            Console.WriteLine($"Inviato:\t\t\t\t" + $"{Stampa(ris, ls: sequenza)}");
+            Console.WriteLine($"Ricevuto:\t\t\t\t" + $"{Stampa(ris, s: strRicevuto)}");
+            
+            // Sistemo l'errore passando la stringa per riferimento
+            string strRicevutoFixed = SistemazioneErrore(ris, strRicevuto);
+            Console.WriteLine($"Ricostruzione della parola corretta:\t" + $"{Stampa(ris, s: strRicevutoFixed)}");
+        }
+
+        /// <summary>
+        /// Permette di controllare che l'input sia composto solo da 0 e 1
+        /// </summary>
+        /// <param name="msg">Messaggio da visualizzare</param>
+        /// <returns>Una stringa contente l'input</returns>
+        static string ControlloInput(string msg)
+        {
+            string strInput;
             bool isValid = true;
             do
             {
-                Console.Write("Inserisci una parola (solo 0 e 1): ");
-                strInviato = Console.ReadLine();
+                Console.Write(msg);
+                strInput = Console.ReadLine();
 
                 // Controllo l'Input
-                for (int i = 0; i < strInviato.Length; i++)
+                for (int i = 0; i < strInput.Length; i++)
                 {
-                    if (strInviato[i] == '0' || strInviato[i] == '1')
+                    if (strInput[i] == '0' || strInput[i] == '1')
                         isValid = true;
                     else
                     {
@@ -34,21 +55,26 @@ namespace AS2021_4H_SIR_BartoliniLiam_Hamming
 
             } while (!isValid);
 
-            InserimentoSpazi(strInviato);
+            return strInput;
+        }
+
+        /// <summary>
+        /// Calcola hamming per la stringa passata
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns>Ritorna la string in ingresso con hamming</returns>
+        static string CalcoloHamming(string s)
+        {
+            /*
+             * InserimentoSpazi(strInviato);
             for (int i = 0; i < nSpazi; i++)
                 InserisciBitParita((int)Math.Pow(2, i));
             Console.WriteLine($"Codifica di Hamming della parola in ingresso:\n{Stampa(sequenza)}");
-
-            Console.Write("\nInserisci la parola ricevuta (comprensiva di codice di Hamming), inserendovi al massimo un errore: ");
-            string strRicevuto = Console.ReadLine();
-
-            int ris = Comparazione(strRicevuto);
-            Console.WriteLine($"Il bit sbagliato si trova alla posizione {ris}");
-            Console.WriteLine($"Inviato:\t\t\t\t" + $"{Stampa(ris - 1, ls: sequenza)}");
-            Console.WriteLine($"Ricevuto:\t\t\t\t" + $"{Stampa(ris - 1, s: strRicevuto)}");
-            SistemazioneErrore(ris - 1, ref strRicevuto);
-            Console.WriteLine($"Ricostruzione della parola corretta:\t" + $"{Stampa(ris - 1, s: strRicevuto)}");
-
+             */
+            InserimentoSpazi(s);
+            for (int i = 0; i < nSpazi; i++)
+                InserisciBitParita((int)Math.Pow(2, i));
+            return Stampa(sequenza);
         }
 
         /// <summary>
@@ -58,24 +84,28 @@ namespace AS2021_4H_SIR_BartoliniLiam_Hamming
         /// <returns>Ritorna -1 se le stringhe hanno più di un errore, 0 se non ci sono errori, altrimenti ritorna la posizione dell'errore</returns>
         static int Comparazione(string ricevuto)
         {
-            int retVal = 0;
+            int retVal = -1;
 
             for (int i = 0; i < nSpazi; i++)
                 if (!CalcoloParita((int)Math.Pow(2, i), ricevuto))
                     retVal += (int)Math.Pow(2, i);
 
+            if (retVal != -1) retVal += 1;
             return retVal;
         }
 
-        static void SistemazioneErrore(int pos, ref string s)
+        static string SistemazioneErrore(int pos, string s)
         {
+            if (pos == -1) return s;
+
+            pos -= 1; // Lo porto 0-based per poterlo usare con i vettori
             char[] chared = s.ToCharArray();
             if (chared[pos] == '1')
                 chared[pos] = '0';
             else
                 chared[pos] = '1';
 
-            s = new string(chared);
+            return new string(chared);
         }
 
         /// <summary>
@@ -98,10 +128,10 @@ namespace AS2021_4H_SIR_BartoliniLiam_Hamming
         /// <summary>
         /// Inserisce li spazi nelle posizioni delle parità
         /// </summary>
-        /// <param name="strInviato"></param>
-        static void InserimentoSpazi(string strInviato)
+        /// <param name="s">Stringa alla quale aggiungere i bit di parità</param>
+        static void InserimentoSpazi(string s)
         {
-            sequenza = new List<char>(strInviato.ToCharArray());
+            sequenza = new List<char>(s.ToCharArray());
             int esp = 0;
             for (int i = 0; i < sequenza.Count; i++)
                 if (i == (int)Math.Pow(2, esp) - 1)
@@ -122,15 +152,10 @@ namespace AS2021_4H_SIR_BartoliniLiam_Hamming
             int cont = 0;
 
             for (int i = start - 1; i < sequenza.Count; i += start * 2)
-            {
-                //Console.WriteLine("indice: " + i);
                 for (int j = i; j < i + start && j < sequenza.Count; j++)
-                {
                     if (sequenza[j] == '1')
                         cont++;
-                    //Console.WriteLine(sequenza[j]);
-                }
-            }
+
             InserisciParita(cont);
         }
 
@@ -160,9 +185,17 @@ namespace AS2021_4H_SIR_BartoliniLiam_Hamming
             return s;
         }
 
+        /// <summary>
+        /// Stampa l'eventuale errore all'interno della lista/string
+        /// </summary>
+        /// <param name="pos">Indice dell'errore 1-based</param>
+        /// <param name="s">Evenutale stringa</param>
+        /// <param name="ls">Evenutale lista da stampare</param>
+        /// <returns>Una stringa con i bit colorati nelle posizioni importanti</returns>
         static string Stampa(int pos, string s = "", List<char> ls = null)
         {
             string toPrint = "";
+            pos -= 1; // Porto la posizioni in 0-based
             int cont = 0;
             if (ls != null)
             {
