@@ -8,6 +8,7 @@ namespace AS2021_4H_SIR_BartoliniLiam_Hamming
     {
         static List<char> sequenza;
         static int nSpazi = 0;
+
         static void Main(string[] args)
         {
             Console.WriteLine("Bartolini Liam, Hamming");
@@ -20,7 +21,7 @@ namespace AS2021_4H_SIR_BartoliniLiam_Hamming
             Console.WriteLine($"Il bit sbagliato si trova alla posizione {ris}");
             Console.WriteLine($"Inviato:\t\t\t\t" + $"{Stampa(ris, ls: sequenza)}");
             Console.WriteLine($"Ricevuto:\t\t\t\t" + $"{Stampa(ris, s: strRicevuto)}");
-            
+
             // Sistemo l'errore passando la stringa per riferimento
             string strRicevutoFixed = SistemazioneErrore(ris, strRicevuto);
             Console.WriteLine($"Ricostruzione della parola corretta:\t" + $"{Stampa(ris, s: strRicevutoFixed)}");
@@ -65,16 +66,10 @@ namespace AS2021_4H_SIR_BartoliniLiam_Hamming
         /// <returns>Ritorna la string in ingresso con hamming</returns>
         static string CalcoloHamming(string s)
         {
-            /*
-             * InserimentoSpazi(strInviato);
-            for (int i = 0; i < nSpazi; i++)
-                InserisciBitParita((int)Math.Pow(2, i));
-            Console.WriteLine($"Codifica di Hamming della parola in ingresso:\n{Stampa(sequenza)}");
-             */
             InserimentoSpazi(s);
             for (int i = 0; i < nSpazi; i++)
                 InserisciBitParita((int)Math.Pow(2, i));
-            return Stampa(sequenza);
+            return StampaLista(sequenza);
         }
 
         /// <summary>
@@ -167,7 +162,7 @@ namespace AS2021_4H_SIR_BartoliniLiam_Hamming
                 sequenza[sequenza.IndexOf('_')] = '1';
         }
 
-        static string Stampa(List<char> ls)
+        static string StampaLista(List<char> ls)
         {
             string s = "";
             int cont = 0;
@@ -204,15 +199,17 @@ namespace AS2021_4H_SIR_BartoliniLiam_Hamming
                     // Coloro i bit di parità
                     if (i == (int)Math.Pow(2, cont) - 1)
                     {
+                        // Se il bit di parità coincide con quello sbagliato allora lo coloro di rosso
                         if (i == pos)
                             toPrint += $"{ls[i]} ".Pastel("#FF0000");
                         else
                             toPrint += $"{ls[i]} ".Pastel("#24fc03");
                         cont++;
-                        continue;
                     }
-
-                    toPrint += $"{ls[i]} ";
+                    else if (i == pos)
+                        toPrint += $"{ls[i]} ".Pastel("#FF0000");
+                    else
+                        toPrint += $"{ls[i]} ";
                 }
             }
             else if (s != "")
@@ -222,16 +219,17 @@ namespace AS2021_4H_SIR_BartoliniLiam_Hamming
                     // Coloro i bit di parità
                     if (i == (int)Math.Pow(2, cont) - 1)
                     {
+                        // Se il bit di parità coincide con quello sbagliato allora lo coloro di rosso
                         if (i == pos)
                             toPrint += $"{s[i]} ".Pastel("#FF0000");
                         else
                             toPrint += $"{s[i]} ".Pastel("#24fc03");
-
                         cont++;
-                        continue;
                     }
-
-                    toPrint += $"{s[i]} ";
+                    else if (i == pos)
+                        toPrint += $"{s[i]} ".Pastel("#FF0000");
+                    else
+                        toPrint += $"{s[i]} ";
                 }
             }
 
